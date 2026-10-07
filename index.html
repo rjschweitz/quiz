@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Quiz practice</title>
+<style>
+:root{
+  --sky1:#2a55d8; --sky2:#3c66e0; --sky3:#5c82e6; --sky4:#c9d2ee; --grass1:#6c8632; --grass2:#546b2c; --grass3:#36471c;
+  --win:#8c8c8c; --pane:#cfcfcf; --bar:#d9d9d9; --boxhead:#ababab; --edge:#5f5f5f; --hi:#efefef;
+  --ink:#151515; --soft:#4f4f4f; --title1:#1d3580; --title2:#172c6e; --field:#f6f4f2;
+  --ok:#1e6b26; --no:#a11d1d; --sel:#3a3a3a; --seltext:#151515; --pick:#b5b5b5;
+  --font:Arial,Helvetica,"Liberation Sans",sans-serif;
+  box-sizing:border-box; color-scheme:light;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;min-height:100vh;color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.4;background:var(--sky2)}
+
+/* scenery */
+.scene{position:fixed;inset:0;z-index:-1;overflow:hidden;
+  background:linear-gradient(180deg,var(--sky1) 0%,var(--sky2) 30%,var(--sky3) 55%,var(--sky4) 70%)}
+.cloud{position:absolute;border-radius:50%;background:radial-gradient(closest-side,rgba(255,255,255,.95),rgba(255,255,255,.55) 55%,rgba(255,255,255,0));filter:blur(2px)}
+.hill{position:absolute;left:-20%;right:-20%;bottom:-38vh;height:78vh;border-radius:50% 50% 0 0/38% 38% 0 0;
+  background:
+   radial-gradient(ellipse 50% 25% at 25% 6%,rgba(255,255,230,.12),transparent 70%),
+   repeating-linear-gradient(95deg,rgba(0,0,0,.05) 0 2px,transparent 2px 5px),
+   linear-gradient(180deg,var(--grass1) 0%,var(--grass2) 25%,var(--grass3) 70%)}
+
+main{max-width:860px;margin:0 auto;padding:24px 14px 60px}
+.mascot{display:block;width:96px;height:96px;margin:30px auto 10px;filter:drop-shadow(0 8px 6px rgba(0,0,0,.35))}
+
+/* window */
+.win{background:var(--win);border:2px solid var(--edge);box-shadow:0 6px 20px rgba(0,0,0,.25)}
+.titlebar{display:flex;justify-content:space-between;align-items:center;gap:10px;color:#fff;padding:2px 10px 2px 18px;font-size:14px;
+  background:linear-gradient(180deg,var(--title1),var(--title2));border-bottom:1px solid var(--edge)}
+.titlebar span:last-child{background:#2a4596;padding:0 8px}
+.menubar{background:var(--bar);border-bottom:2px solid var(--edge);padding:2px 18px;font-size:14px;white-space:nowrap;overflow-x:auto}
+.menubar u{text-underline-offset:2px}
+.addr{display:flex;align-items:center;gap:14px;background:var(--bar);border-bottom:2px solid var(--edge);padding:4px 18px;font-size:14px}
+.addr .url{flex:1;background:var(--field);border:1px solid var(--edge);border-top-color:#333;text-align:center;padding:1px 8px;color:var(--ink);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.panes{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;padding:4px}
+.panes.two{grid-template-columns:2fr 1fr}
+.pane{background:var(--pane);border:2px solid var(--edge);padding:14px 16px;min-width:0;display:flex;flex-direction:column}
+.pane h2{font-size:1.2rem;margin:0 0 12px;font-weight:700}
+.pane h2 .bang{color:#8f8f8f;font-style:italic;font-weight:700}
+b u, .em{font-weight:700;text-decoration:underline;text-underline-offset:2px}
+p{margin:0 0 12px}
+.box{border:2px solid var(--sel);margin:12px 0 4px;background:var(--pane)}
+.box h3{margin:0;background:var(--boxhead);color:var(--ink);border-bottom:2px solid var(--sel);text-align:center;font-size:14px;padding:2px 6px}
+.box .in{padding:7px 8px}
+.foot{margin-top:auto;padding-top:14px;text-align:center}
+
+/* left pane */
+.hero{text-align:center}
+.globe{width:120px;height:120px;margin:4px auto 10px;display:block}
+.big{font-size:1.6rem;font-weight:700;letter-spacing:.04em;margin:0 0 10px;text-align:center}
+.big span{color:var(--ink);font-weight:700}
+.tag{font-weight:700;text-align:center}
+
+/* retro buttons */
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip,.btn{font:inherit;font-size:14px;color:var(--ink);background:var(--pane);cursor:pointer;padding:3px 9px;border:2px solid var(--sel);border-radius:0}
+.chip:hover,.btn:hover:not(:disabled){background:var(--pick)}
+.chip[aria-pressed="true"]{background:var(--pick);color:var(--seltext);font-weight:700;text-decoration:underline;text-underline-offset:2px}
+.chip:active,.btn:active{background:var(--pick)}
+.btn{font-weight:700;padding:6px 14px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.link{font:inherit;font-size:14px;background:none;border:0;color:var(--ink);text-decoration:underline;cursor:pointer;padding:0}
+button:focus-visible,a:focus-visible{outline:2px dotted var(--ink);outline-offset:2px}
+.small{font-size:13px;color:var(--soft)}
+.count{margin:12px 0 8px;font-size:14px}
+
+.stat{display:grid;grid-template-columns:1fr auto;gap:2px 8px;margin:0 0 8px;font-size:13px}
+.stat .bar{grid-column:1/-1;height:9px;border:1px solid var(--sel);background:var(--field)}
+.stat .bar i{display:block;height:100%;background:var(--title1)}
+
+/* quiz */
+.meta{font-size:13px;color:var(--soft);margin:0 0 10px}
+.q{font-size:clamp(1.2rem,3.4vw,1.5rem);line-height:1.35;margin:0 0 16px;font-weight:700}
+.opts{display:grid;gap:6px}
+.opt{font:inherit;font-size:15px;text-align:left;display:flex;gap:10px;align-items:center;cursor:pointer;color:var(--ink);background:var(--pane);padding:7px 10px;border:2px solid var(--sel)}
+.opt:hover:not(:disabled){background:var(--pick)}
+.opt .k{flex:0 0 1.5rem;height:1.5rem;display:grid;place-items:center;border:1px solid var(--sel);font-size:12px;font-weight:700;background:var(--field)}
+.opt:disabled{cursor:default}
+.opt.right{background:var(--pick);color:var(--seltext);font-weight:700;text-decoration:underline}
+.opt.right .k{background:var(--ok);color:#fff;border-color:var(--ok)}
+.opt.wrong{text-decoration:line-through}
+.opt.wrong .k{background:var(--no);color:#fff;border-color:var(--no)}
+.opt.dim{opacity:.55}
+.feedback{margin-top:4px}
+.feedback strong{color:var(--ok)}
+.feedback.bad strong{color:var(--no)}
+.feedback p{margin:4px 0}
+.feedback a{color:var(--ink)}
+.route{display:flex;flex-wrap:wrap;gap:3px;margin:6px 0 4px}
+.route .leg{display:none}
+.route .stop{width:13px;height:13px;border:1px solid var(--sel);background:var(--field)}
+.route .stop.ok{background:var(--title1)}
+.route .stop.no{background:repeating-linear-gradient(45deg,var(--no) 0 2px,var(--field) 2px 4px)}
+.route .stop.now{outline:2px solid var(--title1);outline-offset:1px}
+.timer{height:10px;border:1px solid var(--sel);background:var(--field);margin:8px 0 2px}
+.timer i{display:block;height:100%;background:var(--title1);transition:width 1s linear}
+.score{font-size:clamp(2.6rem,9vw,3.6rem);font-weight:700;letter-spacing:.04em;margin:6px 0 8px}
+.missed{margin:0;padding:0;list-style:none}
+.missed li{padding:6px 0;border-bottom:1px dashed var(--sel);font-size:14px}
+.missed li:last-child{border-bottom:0}
+.missed .ma{font-weight:700;text-decoration:underline}
+.answer-row{display:flex;gap:6px}
+.answer-row input{flex:1;min-width:0;font:inherit;font-size:16px;color:var(--ink);background:var(--field);padding:7px 9px;border:2px solid;border-color:var(--edge) var(--hi) var(--hi) var(--edge);border-radius:0}
+.answer-row input:focus{outline:2px dotted var(--ink);outline-offset:2px}
+.answer-row input:disabled{opacity:.7}
+.hintline{margin:10px 0 0;font-size:14px}
+.hintline .pat{font-family:"Courier New",monospace;font-weight:700;letter-spacing:.12em;background:var(--field);border:1px solid var(--sel);padding:1px 6px;white-space:pre-wrap}
+.tools{display:flex;gap:14px;align-items:center;margin-top:10px;flex-wrap:wrap}
+.opts{margin-top:10px}
+.hidden{display:none !important}
+@media (max-width:720px){.panes,.panes.two{grid-template-columns:1fr}.mascot{margin-top:10px}}
+@media (prefers-reduced-motion:reduce){.timer i{transition:none}}
+</style>
+</head>
+<body>
+<div class="scene" aria-hidden="true">
+  <span class="cloud" style="width:620px;height:220px;left:30%;top:-40px"></span>
+  <span class="cloud" style="width:420px;height:150px;left:-120px;top:120px"></span>
+  <span class="cloud" style="width:300px;height:110px;right:-60px;top:260px"></span>
+  <span class="cloud" style="width:260px;height:90px;left:12%;top:380px"></span>
+  <span class="cloud" style="width:380px;height:120px;right:18%;top:470px"></span>
+  <div class="hill"></div>
+</div>
+<main>
+<svg class="mascot" viewBox="0 0 100 100" aria-hidden="true">
+  <circle cx="50" cy="50" r="44" fill="#2f6fd6" stroke="#111" stroke-width="3"/>
+  <path d="M30 22c8 2 12 8 10 14s-10 6-12 13 6 10 4 17-10 6-14 2c-6-8-8-30 12-46zM58 14c10 4 22 14 26 28-6 2-12-2-16 2s0 12-6 16-10-4-14-2-2 12-8 12c-2-10 4-16 2-22s-8-6-6-14 12-6 22-20z" fill="#5cb83a" stroke="#111" stroke-width="2"/>
+  <ellipse cx="50" cy="50" rx="44" ry="16" fill="none" stroke="#111" stroke-width="1.5" opacity=".35"/>
+  <ellipse cx="50" cy="50" rx="18" ry="44" fill="none" stroke="#111" stroke-width="1.5" opacity=".35"/>
+  <ellipse cx="38" cy="30" rx="10" ry="6" fill="#fff" opacity=".35"/>
+</svg>
+<div class="win">
+  <div class="titlebar"><span>quiz internet explorer</span><span>📁 Reuben's file</span></div>
+  <div class="menubar"><u>F</u>ile <u>E</u>dit <u>V</u>iew <u>G</u>o <u>H</u>elp | 📁 Practice ~ quiz | <u>F</u>olders</div>
+  <div class="addr"><span>Address | &gt; <u>G</u>o</span><span class="url" id="url">https://quiz-practice.com</span></div>
+
+  <section id="setup" class="panes">
+    <div class="pane hero">
+      <svg class="globe" viewBox="0 0 100 100" aria-hidden="true">
+        <rect x="10" y="10" width="80" height="80" fill="var(--field)" stroke="var(--sel)" stroke-width="2"/>
+        <text x="50" y="66" font-size="46" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="700" fill="var(--ink)">?!</text>
+      </svg>
+      <p class="big">QUIZ <span>?!</span></p>
+      <p class="tag"><b><u>geography</u></b> and <b><u>history</u></b> nerd. practising to get better and better.</p>
+      <div class="box" style="text-align:left"><h3>stats !!</h3><div class="in" id="stats"></div></div>
+    </div>
+
+    <div class="pane">
+      <h2>pick <span class="bang">!</span></h2>
+      <p>choose your <b><u>topics</u></b>. you can pick more than one.</p>
+      <div class="chips" id="cats"></div>
+      <div class="box"><h3>diff !!</h3><div class="in"><div class="chips" id="diff"></div></div></div>
+      <div class="box"><h3>length !!</h3><div class="in"><div class="chips" id="len"></div></div></div>
+    </div>
+
+    <div class="pane">
+      <h2>play <span class="bang">!</span></h2>
+      <p>missed answers get saved to your <b><u>weak spots</u></b>. drill them till they stick.</p>
+      <div class="box"><h3>mode !!</h3><div class="in"><div class="chips" id="mode"></div></div></div>
+      <div class="box"><h3>timer !!</h3><div class="in"><div class="chips" id="timer"></div></div></div>
+      <p class="count" id="count"></p>
+      <button class="btn" id="start">Start quiz</button>
+      <div class="foot small">📎 answers checked against real sources</div>
+    </div>
+  </section>
+
+  <section id="quiz" class="panes two hidden" aria-live="polite">
+    <div class="pane">
+      <p class="meta" id="meta"></p>
+      <h2 class="q" id="qtext"></h2>
+      <div class="answer-row"><input id="ans" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="type your answer" aria-label="Your answer"><button class="btn" id="submit">Go</button></div>
+      <div class="tools"><button class="btn" id="hint">Hint</button><button class="link" id="giveup">give up</button></div>
+      <p class="hintline hidden" id="hintline"></p>
+      <div class="opts hidden" id="opts"></div>
+      <div class="box hidden" id="fbbox"><h3>answer !!</h3><div class="in" id="fb"></div></div>
+      <div style="margin-top:12px"><button class="btn hidden" id="next">Next question</button></div>
+    </div>
+    <div class="pane">
+      <h2>round <span class="bang">!</span></h2>
+      <p id="tally"></p>
+      <div class="box"><h3>route !!</h3><div class="in"><div class="route" id="route" aria-hidden="true"></div></div></div>
+      <div class="box hidden" id="timerbar-box"><h3>time !!</h3><div class="in"><div class="timer" id="timerbar"><i></i></div></div></div>
+      <p class="small" style="margin-top:12px">spelling doesn't have to be perfect. first hint shows the first letter, second hint gives you 4 options.</p>
+      <div class="foot"><button class="link" id="quit">end round</button></div>
+    </div>
+  </section>
+
+  <section id="results" class="panes two hidden">
+    <div class="pane">
+      <h2>results <span class="bang">!</span></h2>
+      <p class="small" id="rmeta"></p>
+      <div class="score" id="rscore"></div>
+      <p id="rnote"></p>
+      <div class="box hidden" id="reviewbox"><h3>to review !!</h3><div class="in"><ul class="missed" id="missed"></ul></div></div>
+    </div>
+    <div class="pane">
+      <h2>again <span class="bang">?!</span></h2>
+      <p>same settings or <b><u>switch it up</u></b>.</p>
+      <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start">
+        <button class="btn" id="again">Play again</button>
+        <button class="btn" id="back">Change settings</button>
+      </div>
+    </div>
+  </section>
+</div>
+</main>
+<script>
+const CATS={geo:"Geography",his:"History",sci:"Science and nature",art:"Arts and literature"};
+const DIFF=["","Easy","Medium","Hard"];
+const SRC={
+ fb:["CIA World Factbook","https://www.cia.gov/the-world-factbook/"],
+ br:["Encyclopaedia Britannica",null],
+ nasa:["NASA","https://www.nasa.gov/"],
+ naa:["National Archives of Australia","https://www.naa.gov.au/"],
+ awm:["Australian War Memorial","https://www.awm.gov.au/"],
+ un:["United Nations","https://www.un.org/en/"]
+};
+// [category, difficulty 1-3, question, answer, [wrong answers], note, source]
+const Q=[
+["geo",1,"What is the capital of Australia?","Canberra",["Sydney","Melbourne","Perth"],"Canberra was purpose-built as a compromise between Sydney and Melbourne and has been the seat of parliament since 1927.","fb"],
+["geo",1,"Which is the largest ocean on Earth?","Pacific Ocean",["Atlantic Ocean","Indian Ocean","Southern Ocean"],"The Pacific covers roughly a third of the planet's surface.","fb"],
+["geo",1,"What is the capital of Canada?","Ottawa",["Toronto","Montreal","Vancouver"],"Ottawa sits in Ontario on the border with Quebec.","fb"],
+["geo",1,"Which country has the largest land area?","Russia",["Canada","China","United States"],"Russia is about 17 million square kilometres, almost twice the size of Canada.","fb"],
+["geo",1,"What is the largest hot desert in the world?","Sahara",["Arabian Desert","Gobi Desert","Kalahari Desert"],"Antarctica is the largest desert overall, but the Sahara is the largest hot one.","br"],
+["geo",1,"Mount Everest sits on the border between Nepal and which other country?","China",["India","Bhutan","Pakistan"],"The northern side is in the Tibet Autonomous Region of China.","fb"],
+["geo",1,"What is the smallest country in the world by area?","Vatican City",["Monaco","San Marino","Nauru"],"Vatican City is about 0.44 square kilometres.","fb"],
+["geo",1,"The Great Barrier Reef lies off the coast of which Australian state?","Queensland",["New South Wales","Northern Territory","Western Australia"],"It stretches over 2,000 kilometres along the Queensland coast.","br"],
+["geo",1,"What is the capital of Egypt?","Cairo",["Alexandria","Giza","Luxor"],"Cairo sits on the Nile, just south of the delta.","fb"],
+["geo",1,"What is the capital of Argentina?","Buenos Aires",["Córdoba","Santiago","Montevideo"],"Santiago is Chile's capital and Montevideo is Uruguay's.","fb"],
+["geo",1,"What is the longest river in South America?","Amazon",["Paraná","Orinoco","Magdalena"],"The Amazon also carries more water than any other river on Earth.","br"],
+["geo",2,"What is the capital of New Zealand?","Wellington",["Auckland","Christchurch","Hamilton"],"Auckland is the biggest city, but Wellington has been the capital since 1865.","fb"],
+["geo",2,"What is the capital of Turkey?","Ankara",["Istanbul","Izmir","Antalya"],"Ankara became the capital in 1923 when the Republic of Turkey was founded.","fb"],
+["geo",2,"What is the capital of Brazil?","Brasília",["Rio de Janeiro","São Paulo","Salvador"],"Brasília was built from scratch and became the capital in 1960, taking over from Rio.","fb"],
+["geo",2,"Lake Titicaca is shared by Peru and which other country?","Bolivia",["Chile","Ecuador","Argentina"],"It's one of the highest navigable lakes in the world.","br"],
+["geo",2,"Which strait separates Spain from Morocco?","Strait of Gibraltar",["Bosporus","Strait of Hormuz","Strait of Messina"],"At its narrowest it is about 13 kilometres wide.","br"],
+["geo",2,"Which African country has the largest population?","Nigeria",["Ethiopia","Egypt","DR Congo"],"Nigeria has over 200 million people.","fb"],
+["geo",2,"Not counting Australia, what is the largest island in the world?","Greenland",["New Guinea","Borneo","Madagascar"],"Australia is classed as a continent, which leaves Greenland as the biggest island.","br"],
+["geo",2,"The deepest known point in the ocean is in which trench?","Mariana Trench",["Tonga Trench","Puerto Rico Trench","Java Trench"],"The Challenger Deep in the Mariana Trench is close to 11,000 metres down.","br"],
+["geo",2,"Which river flows through Baghdad?","Tigris",["Euphrates","Jordan","Nile"],"The Tigris and Euphrates both run through Iraq, but Baghdad is on the Tigris.","br"],
+["geo",2,"Uluru is in which Australian state or territory?","Northern Territory",["South Australia","Western Australia","Queensland"],"It sits in Uluru-Kata Tjuta National Park, which is World Heritage listed.","br"],
+["geo",2,"The Danube flows into which sea?","Black Sea",["Adriatic Sea","Caspian Sea","Baltic Sea"],"Its delta is mostly in Romania.","br"],
+["geo",2,"Which body of water separates Tasmania from mainland Australia?","Bass Strait",["Torres Strait","Cook Strait","Banks Strait"],"Cook Strait is in New Zealand and Torres Strait is between Queensland and Papua New Guinea.","br"],
+["geo",2,"The Atacama Desert is mostly in which country?","Chile",["Peru","Argentina","Bolivia"],"It's one of the driest non-polar places on Earth.","br"],
+["geo",2,"Victoria Falls sits on the border between Zambia and which country?","Zimbabwe",["Botswana","Malawi","Mozambique"],"The falls are on the Zambezi River.","br"],
+["geo",2,"Which country has had the largest population since 2023, according to UN estimates?","India",["China","United States","Indonesia"],"UN figures showed India passing China in 2023.","un"],
+["geo",2,"Mount Kosciuszko, Australia's highest mainland peak, is in which range?","Snowy Mountains",["Blue Mountains","Grampians","MacDonnell Ranges"],"It's 2,228 metres high and part of the Great Dividing Range.","br"],
+["geo",2,"Swahili and English are official languages of which country, whose capital is Dodoma?","Tanzania",["Kenya","Uganda","Malawi"],"Kenya also uses both languages, but its capital is Nairobi.","fb"],
+["geo",3,"What is the capital of Kazakhstan?","Astana",["Almaty","Bishkek","Tashkent"],"The city was renamed Nur-Sultan in 2019, then went back to Astana in 2022.","fb"],
+["geo",3,"Which country is completely surrounded by South Africa?","Lesotho",["Eswatini","Botswana","Namibia"],"Eswatini is almost surrounded too, but it also borders Mozambique.","fb"],
+["geo",3,"What is the highest mountain in Africa?","Mount Kilimanjaro",["Mount Kenya","Mount Stanley","Ras Dashen"],"Kilimanjaro is in Tanzania and rises to about 5,895 metres.","br"],
+["geo",3,"There are two doubly landlocked countries. One is Liechtenstein. What is the other?","Uzbekistan",["Kazakhstan","Mongolia","Switzerland"],"Doubly landlocked means every neighbour is also landlocked.","br"],
+["geo",3,"What is the capital of Myanmar?","Naypyidaw",["Yangon","Mandalay","Bago"],"The government moved the capital from Yangon in 2005 to 2006.","fb"],
+["geo",3,"Counting overseas territories, which country has the most time zones?","France",["Russia","United States","United Kingdom"],"Its territories spread across the globe, giving France 12 time zones.","fb"],
+["geo",3,"What is the longest continental mountain range in the world?","Andes",["Rocky Mountains","Himalayas","Ural Mountains"],"The Andes run about 7,000 kilometres down South America.","br"],
+["geo",3,"Which country has the longest coastline?","Canada",["Indonesia","Russia","Australia"],"Canada's coastline is over 200,000 kilometres, thanks to its many Arctic islands.","fb"],
+["geo",3,"What is the capital of Bhutan?","Thimphu",["Paro","Kathmandu","Punakha"],"Kathmandu is the capital of Nepal.","fb"],
+["geo",3,"The lowest land on Earth is the shore of which body of water?","Dead Sea",["Caspian Sea","Lake Assal","Sea of Galilee"],"The shoreline is more than 400 metres below sea level.","fb"],
+["geo",3,"Ljubljana is the capital of which country?","Slovenia",["Slovakia","Croatia","Serbia"],"Slovakia's capital is Bratislava, which is easy to mix up.","fb"],
+["geo",3,"What is the longest river in Europe?","Volga",["Danube","Rhine","Dnieper"],"The Volga runs about 3,500 kilometres through Russia into the Caspian Sea.","br"],
+
+["his",1,"Who was the first person to walk on the Moon?","Neil Armstrong",["Buzz Aldrin","Yuri Gagarin","Michael Collins"],"Armstrong stepped out in July 1969 during Apollo 11. Gagarin was the first person in space.","nasa"],
+["his",1,"In what year did World War II end?","1945",["1944","1946","1939"],"Germany surrendered in May 1945 and Japan in September 1945.","awm"],
+["his",1,"Who was the first President of the United States?","George Washington",["John Adams","Thomas Jefferson","Abraham Lincoln"],"Washington served from 1789 to 1797.","br"],
+["his",1,"In what year did the Berlin Wall fall?","1989",["1991","1987","1985"],"The wall opened on 9 November 1989. Germany reunified in 1990.","br"],
+["his",1,"In what year did the First Fleet arrive at Sydney Cove?","1788",["1770","1801","1776"],"1770 is when Cook sailed up the east coast.","naa"],
+["his",1,"Which of the Seven Wonders of the Ancient World is still standing?","Great Pyramid of Giza",["Lighthouse of Alexandria","Colossus of Rhodes","Hanging Gardens of Babylon"],"It's the oldest of the seven and the only survivor.","br"],
+["his",1,"Who was British Prime Minister for most of World War II?","Winston Churchill",["Neville Chamberlain","Clement Attlee","Anthony Eden"],"Churchill took over from Chamberlain in May 1940.","br"],
+["his",1,"Who was Australia's first female Prime Minister?","Julia Gillard",["Julie Bishop","Quentin Bryce","Kristina Keneally"],"Gillard served from 2010 to 2013. Quentin Bryce was the first female Governor-General.","naa"],
+["his",1,"What was the capital of the Byzantine Empire?","Constantinople",["Rome","Athens","Antioch"],"Today it's Istanbul.","br"],
+["his",1,"Which country gave the Statue of Liberty to the United States?","France",["United Kingdom","Spain","Netherlands"],"It was dedicated in 1886.","br"],
+["his",2,"Who was the first Roman emperor?","Augustus",["Julius Caesar","Nero","Caligula"],"Julius Caesar was a dictator, never an emperor. His heir Octavian became Augustus in 27 BC.","br"],
+["his",2,"In what year did Australia's colonies federate?","1901",["1788","1900","1915"],"The Commonwealth of Australia began on 1 January 1901.","naa"],
+["his",2,"In what year did the Gallipoli landing take place?","1915",["1914","1916","1918"],"Anzac troops landed on 25 April 1915.","awm"],
+["his",2,"In what year was Magna Carta sealed?","1215",["1066","1315","1415"],"King John sealed it at Runnymede.","br"],
+["his",2,"In what year was the Battle of Hastings?","1066",["1215","1086","1016"],"William of Normandy defeated Harold II. 1086 is the year of the Domesday Book.","br"],
+["his",2,"Who led the Soviet Union for most of World War II?","Joseph Stalin",["Vladimir Lenin","Nikita Khrushchev","Leon Trotsky"],"Lenin died in 1924, long before the war.","br"],
+["his",2,"What was the name of James Cook's ship on his first voyage to the Pacific?","HMS Endeavour",["HMS Bounty","HMS Beagle","HMS Resolution"],"Resolution was his ship on the second and third voyages.","br"],
+["his",2,"Which civilisation built Machu Picchu?","Inca",["Aztec","Maya","Olmec"],"It was built in the 1400s in the Andes of Peru.","br"],
+["his",2,"In what year did the French Revolution begin with the storming of the Bastille?","1789",["1776","1793","1804"],"The Bastille fell on 14 July 1789.","br"],
+["his",2,"Who was the first woman to win a Nobel Prize?","Marie Curie",["Rosalind Franklin","Ada Lovelace","Dorothy Hodgkin"],"She won physics in 1903 and chemistry in 1911.","br"],
+["his",2,"In what year did the Titanic sink?","1912",["1905","1915","1921"],"It hit an iceberg on its maiden voyage in April 1912.","br"],
+["his",2,"Who was Australia's first Prime Minister?","Edmund Barton",["Alfred Deakin","Henry Parkes","John Curtin"],"Parkes is called the father of Federation but died before it happened.","naa"],
+["his",2,"Howard Carter found which pharaoh's tomb almost untouched in 1922?","Tutankhamun",["Ramesses II","Khufu","Akhenaten"],"The tomb is in the Valley of the Kings.","br"],
+["his",2,"The Hundred Years' War was mainly fought between England and which country?","France",["Spain","Scotland","Netherlands"],"It actually ran on and off for 116 years, from 1337 to 1453.","br"],
+["his",2,"In what year did India gain independence from Britain?","1947",["1950","1945","1948"],"Independence came on 15 August 1947. India became a republic in 1950.","br"],
+["his",2,"In what year did Nelson Mandela become President of South Africa?","1994",["1990","1991","1999"],"He was released from prison in 1990 and elected after the first fully democratic election.","br"],
+["his",2,"In what year was the Battle of Waterloo?","1815",["1805","1812","1821"],"Napoleon was defeated in present-day Belgium. 1805 was Trafalgar.","br"],
+["his",2,"Which ancient people developed cuneiform writing?","Sumerians",["Egyptians","Phoenicians","Minoans"],"Cuneiform was pressed into clay tablets in Mesopotamia.","br"],
+["his",2,"Whose expedition was the first to sail around the world, even though he died on the way?","Ferdinand Magellan",["Francis Drake","Christopher Columbus","Vasco da Gama"],"Magellan was killed in the Philippines in 1521. Juan Sebastián Elcano finished the voyage.","br"],
+["his",2,"The Meiji Restoration happened in which country?","Japan",["China","Korea","Thailand"],"It started in 1868 and quickly modernised Japan.","br"],
+["his",2,"In what year did Australians vote for Aboriginal and Torres Strait Islander people to be counted in the census?","1967",["1962","1972","1975"],"1962 is when all Aboriginal people got the right to vote in federal elections.","naa"],
+["his",2,"In what year was the Cuban Missile Crisis?","1962",["1959","1961","1968"],"It lasted 13 days in October 1962.","br"],
+["his",2,"The Wars of the Roses were fought between the House of York and which house?","Lancaster",["Tudor","Stuart","Windsor"],"Henry Tudor ended them in 1485 and started the Tudor dynasty.","br"],
+["his",2,"Whose 95 Theses in 1517 are often seen as the start of the Reformation?","Martin Luther",["John Calvin","Huldrych Zwingli","John Knox"],"Luther was a German monk and professor.","br"],
+["his",2,"Tenochtitlan was the capital of which empire?","Aztec",["Inca","Maya","Toltec"],"Mexico City is built on its ruins.","br"],
+["his",2,"In what year did the Soviet Union dissolve?","1991",["1989","1993","1985"],"It formally ended in December 1991.","br"],
+["his",3,"Which treaty formally ended World War I with Germany?","Treaty of Versailles",["Treaty of Brest-Litovsk","Treaty of Ghent","Peace of Westphalia"],"It was signed in June 1919. Brest-Litovsk was between Germany and Russia in 1918.","br"],
+["his",3,"Who was the last Tsar of Russia?","Nicholas II",["Alexander III","Peter the Great","Alexander II"],"He abdicated in 1917.","br"],
+["his",3,"In what year did Constantinople fall to the Ottomans?","1453",["1204","1492","1571"],"1204 is when the Fourth Crusade sacked the city.","br"],
+["his",3,"Who was the first emperor of a unified China?","Qin Shi Huang",["Kublai Khan","Liu Bang","Sun Yat-sen"],"He unified China in 221 BC and is buried with the Terracotta Army.","br"],
+["his",3,"The Eureka Stockade took place in which colony?","Victoria",["New South Wales","South Australia","Queensland"],"It happened at Ballarat in December 1854.","naa"],
+["his",3,"Who wrote The Communist Manifesto with Friedrich Engels?","Karl Marx",["Vladimir Lenin","Leon Trotsky","Mikhail Bakunin"],"It was published in 1848.","br"],
+["his",3,"Which war did the Peace of Westphalia end in 1648?","Thirty Years' War",["Seven Years' War","Hundred Years' War","War of the Spanish Succession"],"The Thirty Years' War devastated much of central Europe.","br"],
+["his",3,"Who founded the Mughal Empire?","Babur",["Akbar","Aurangzeb","Shah Jahan"],"Babur won the First Battle of Panipat in 1526. Shah Jahan built the Taj Mahal.","br"],
+["his",3,"Who created an empire stretching from Greece to northwest India in the 300s BC?","Alexander the Great",["Darius the Great","Philip II","Pericles"],"Philip II was Alexander's father.","br"],
+
+["sci",1,"What is the chemical symbol for gold?","Au",["Ag","Gd","Go"],"It comes from the Latin aurum. Ag is silver.","br"],
+["sci",1,"Which planet is closest to the Sun?","Mercury",["Venus","Mars","Earth"],"Mercury takes 88 days to orbit the Sun.","nasa"],
+["sci",1,"What is the largest planet in our solar system?","Jupiter",["Saturn","Neptune","Uranus"],"More than 1,000 Earths could fit inside it.","nasa"],
+["sci",1,"Which gas do plants mainly take in for photosynthesis?","Carbon dioxide",["Oxygen","Nitrogen","Hydrogen"],"They release oxygen as a by-product.","br"],
+["sci",1,"What is the hardest natural mineral?","Diamond",["Quartz","Topaz","Corundum"],"Diamond is a 10 on the Mohs scale.","br"],
+["sci",1,"Which element has atomic number 1?","Hydrogen",["Helium","Oxygen","Carbon"],"Hydrogen is also the most abundant element in the universe.","br"],
+["sci",1,"Who developed the theory of general relativity?","Albert Einstein",["Isaac Newton","Niels Bohr","Max Planck"],"He published it in 1915.","br"],
+["sci",2,"How many bones are in the adult human body?","206",["186","212","230"],"Babies are born with more, and some fuse together as they grow.","br"],
+["sci",2,"Roughly how fast does light travel in a vacuum?","300,000 km per second",["30,000 km per second","3,000,000 km per second","150,000 km per second"],"The exact figure is 299,792 km per second.","nasa"],
+["sci",2,"Who wrote On the Origin of Species?","Charles Darwin",["Alfred Russel Wallace","Gregor Mendel","Jean-Baptiste Lamarck"],"Published in 1859. Wallace came up with natural selection independently around the same time.","br"],
+["sci",2,"What is the most common gas in Earth's atmosphere?","Nitrogen",["Oxygen","Argon","Carbon dioxide"],"Nitrogen is about 78 percent and oxygen about 21 percent.","nasa"],
+["sci",2,"Titan is a moon of which planet?","Saturn",["Jupiter","Uranus","Neptune"],"It's the only moon known to have a thick atmosphere.","nasa"],
+["sci",2,"The platypus belongs to which group of mammals?","Monotremes",["Marsupials","Placentals","Rodents"],"Monotremes lay eggs. The echidna is the other one.","br"],
+["sci",2,"What is the chemical formula for table salt?","NaCl",["KCl","NaOH","CaCO3"],"Sodium chloride.","br"],
+["sci",2,"What is the pH of pure water at 25°C?","7",["0","5","14"],"7 is neutral on the pH scale.","br"],
+["sci",2,"What is the largest organ of the human body?","Skin",["Liver","Lungs","Brain"],"The liver is the largest internal organ.","br"],
+["sci",2,"Who discovered penicillin in 1928?","Alexander Fleming",["Louis Pasteur","Joseph Lister","Edward Jenner"],"Australian Howard Florey later helped turn it into a usable drug.","br"],
+["sci",3,"Which protein in red blood cells carries oxygen?","Haemoglobin",["Insulin","Keratin","Collagen"],"It contains iron, which is what makes blood red.","br"],
+
+["art",1,"Who painted the Mona Lisa?","Leonardo da Vinci",["Michelangelo","Raphael","Sandro Botticelli"],"It hangs in the Louvre in Paris.","br"],
+["art",1,"Who wrote Romeo and Juliet?","William Shakespeare",["Christopher Marlowe","Ben Jonson","Geoffrey Chaucer"],"It was written in the mid 1590s.","br"],
+["art",1,"Who wrote Pride and Prejudice?","Jane Austen",["Charlotte Brontë","George Eliot","Mary Shelley"],"It was published in 1813.","br"],
+["art",1,"Who painted The Starry Night?","Vincent van Gogh",["Claude Monet","Paul Gauguin","Paul Cézanne"],"He painted it in 1889.","br"],
+["art",1,"Who wrote the novel Nineteen Eighty-Four?","George Orwell",["Aldous Huxley","Ray Bradbury","H. G. Wells"],"Published in 1949. Huxley wrote Brave New World.","br"],
+["art",1,"Which epic poem about Odysseus's journey home is traditionally credited to Homer?","The Odyssey",["The Aeneid","Beowulf","The Divine Comedy"],"Virgil wrote the Aeneid.","br"],
+["art",1,"Frida Kahlo came from which country?","Mexico",["Spain","Argentina","Colombia"],"She was born in Coyoacán, now part of Mexico City.","br"],
+["art",2,"Which composer wrote the Ninth Symphony that includes the ‘Ode to Joy’?","Ludwig van Beethoven",["Wolfgang Amadeus Mozart","Johann Sebastian Bach","Johannes Brahms"],"Beethoven was almost completely deaf when he wrote it.","br"],
+["art",2,"Who designed the Sydney Opera House?","Jørn Utzon",["Harry Seidler","Frank Gehry","Walter Burley Griffin"],"Utzon was Danish. Burley Griffin designed Canberra.","br"],
+["art",2,"Who painted the ceiling of the Sistine Chapel?","Michelangelo",["Leonardo da Vinci","Raphael","Titian"],"He worked on it from 1508 to 1512.","br"],
+["art",2,"Who wrote War and Peace?","Leo Tolstoy",["Fyodor Dostoevsky","Anton Chekhov","Ivan Turgenev"],"It was published in parts in the 1860s.","br"],
+["art",2,"Who composed The Four Seasons?","Antonio Vivaldi",["George Frideric Handel","Joseph Haydn","Claudio Monteverdi"],"It's a set of four violin concertos.","br"],
+["art",2,"Who wrote Don Quixote?","Miguel de Cervantes",["Lope de Vega","Gabriel García Márquez","Federico García Lorca"],"The first part came out in 1605.","br"],
+["art",2,"Who painted Guernica?","Pablo Picasso",["Salvador Dalí","Joan Miró","Diego Velázquez"],"He painted it in 1937 after the bombing of the Basque town.","br"],
+["art",2,"Who wrote the words to Waltzing Matilda?","Banjo Paterson",["Henry Lawson","C. J. Dennis","Dorothea Mackellar"],"He wrote them in 1895 in Queensland.","naa"],
+["art",2,"Who wrote the poem My Country?","Dorothea Mackellar",["Banjo Paterson","Henry Lawson","Judith Wright"],"It was first published in 1908.","br"],
+["art",3,"Who wrote One Hundred Years of Solitude?","Gabriel García Márquez",["Isabel Allende","Jorge Luis Borges","Mario Vargas Llosa"],"He was Colombian and won the Nobel Prize in Literature in 1982.","br"]
+];
+const ID=q=>q[2];
+
+const KEY="quiz-practice-v1";
+function loadStats(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.q)return s}catch(e){}return {q:{},best:0}}
+function saveStats(){try{localStorage.setItem(KEY,JSON.stringify(stats))}catch(e){}}
+let stats=loadStats();
+
+const settings={cats:new Set(["geo","his"]),diff:0,len:10,mode:"mixed",timer:0};
+const $=id=>document.getElementById(id);
+
+function chipGroup(el,items,isOn,onClick){
+  el.innerHTML="";
+  items.forEach(([val,label])=>{
+    const b=document.createElement("button");
+    b.className="chip";b.textContent=label;
+    b.setAttribute("aria-pressed",isOn(val));
+    b.onclick=()=>{onClick(val);renderSetup()};
+    el.appendChild(b);
+  });
+}
+function isWeak(q){const s=stats.q[ID(q)];return !!s&&(s.last===0||(s.w>0&&s.w>=s.r))}
+function pool(){
+  return Q.filter(q=>settings.cats.has(q[0])&&(!settings.diff||q[1]===settings.diff)&&(settings.mode!=="weak"||isWeak(q)));
+}
+function renderSetup(){
+  chipGroup($("cats"),Object.entries(CATS),v=>settings.cats.has(v),v=>{settings.cats.has(v)?settings.cats.delete(v):settings.cats.add(v)});
+  chipGroup($("diff"),[[0,"Any"],[1,"Easy"],[2,"Medium"],[3,"Hard"]],v=>settings.diff===v,v=>settings.diff=v);
+  chipGroup($("len"),[[10,"10"],[20,"20"],[0,"All of them"]],v=>settings.len===v,v=>settings.len=v);
+  chipGroup($("mode"),[["mixed","Fresh questions first"],["weak","Weak spots only"]],v=>settings.mode===v,v=>settings.mode=v);
+  chipGroup($("timer"),[[0,"Off"],[20,"20 seconds"],[10,"10 seconds"]],v=>settings.timer===v,v=>settings.timer=v);
+  const n=pool().length;
+  const btn=$("start");
+  if(!settings.cats.size){$("count").textContent="Pick at least one topic.";btn.disabled=true}
+  else if(!n){$("count").textContent=settings.mode==="weak"?"No weak spots here yet. Play a normal round first, then come back.":"No questions match. Try a different difficulty.";btn.disabled=true}
+  else{const take=settings.len?Math.min(settings.len,n):n;$("count").textContent=`${take} question${take>1?"s":""} this round, from ${n} that match.`;btn.disabled=false}
+  renderStats();
+}
+function renderStats(){
+  const el=$("stats");
+  const per={};let seen=0,right=0,wrong=0;
+  Q.forEach(q=>{const s=stats.q[ID(q)];if(!s)return;seen++;right+=s.r;wrong+=s.w;
+    per[q[0]]=per[q[0]]||{r:0,w:0};per[q[0]].r+=s.r;per[q[0]].w+=s.w});
+  if(!seen){el.innerHTML=`<p class="small">Nothing yet. Your accuracy by topic will show up here after your first round.</p><p class="small">Questions are checked against the CIA World Factbook, Encyclopaedia Britannica, NASA, the National Archives of Australia and the Australian War Memorial. Each answer shows where to look it up.</p>`;return}
+  const weak=Q.filter(isWeak).length;
+  let h="";
+  Object.keys(CATS).forEach(c=>{const p=per[c];if(!p)return;const pct=Math.round(p.r/(p.r+p.w)*100);
+    h+=`<div class="stat"><span>${CATS[c]}</span><span>${pct}%</span><div class="bar"><i style="width:${pct}%"></i></div></div>`});
+  h+=`<p class="small">${seen} of ${Q.length} questions seen. ${right+wrong} answers, best streak ${stats.best}. ${weak} question${weak===1?"":"s"} in your weak spots.</p>`;
+  h+=`<button class="link" id="reset">reset progress</button>`;
+  el.innerHTML=h;
+  $("reset").onclick=()=>{if(confirm("Clear all your saved progress?")){stats={q:{},best:0};saveStats();renderSetup()}};
+}
+
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+
+let round=null,timerId=null,streak=0;
+function startRound(){
+  let p=shuffle(pool());
+  if(settings.mode==="mixed"){p.sort((a,b)=>{const sa=stats.q[ID(a)],sb=stats.q[ID(b)];return ((sa?sa.r+sa.w:0)-(sb?sb.r+sb.w:0))})}
+  const take=settings.len?Math.min(settings.len,p.length):p.length;
+  round={qs:shuffle(p.slice(0,take)),i:0,res:[],answered:false};
+  show("quiz");renderQ();
+}
+function show(id){$("url").textContent="https://quiz-practice.com"+(id==="setup"?"":"/"+id);["setup","quiz","results"].forEach(s=>$(s).classList.toggle("hidden",s!==id));window.scrollTo(0,0)}
+function renderRoute(){
+  const r=$("route");r.innerHTML="";
+  round.qs.forEach((_,i)=>{
+    if(i){const l=document.createElement("span");l.className="leg";r.appendChild(l)}
+    const s=document.createElement("span");s.className="stop";
+    if(i<round.res.length)s.classList.add(round.res[i]?"ok":"no");
+    else if(i===round.i)s.classList.add("now");
+    r.appendChild(s);
+  });
+  const cur=r.querySelector(".now");if(cur)cur.scrollIntoView({block:"nearest",inline:"center"});
+}
+const ALIAS={"Leonardo da Vinci":["leonardo","da vinci"],"300,000 km per second":["300000","300000 km","300000 kms","300000 km s"],"Carbon dioxide":["co2"],"Haemoglobin":["hemoglobin"],"Qin Shi Huang":["qin","shi huang","qin shihuang"],"Nicholas II":["nicholas 2","nicholas the second","nicholas"],"Great Pyramid of Giza":["pyramid","pyramids","great pyramid","pyramids of giza","pyramid of giza"],"Snowy Mountains":["snowies","snowy"],"Jørn Utzon":["utzon"],"United States":["usa","us","america"],"DR Congo":["congo","drc"],"Mount Kilimanjaro":["kilimanjaro"],"Strait of Gibraltar":["gibraltar"],"Thirty Years' War":["30 years war","30 years"],"Lancaster":["house of lancaster"],"Sahara":["sahara desert"],"Alexander the Great":["alexander"],"Augustus":["octavian","caesar augustus"],"Ferdinand Magellan":["magellan"],"Banjo Paterson":["banjo","paterson","andrew barton paterson","ab paterson"]};
+const STOP=new Set(["the","a","an","of","mount","mt","ocean","sea","river","lake","strait","desert","trench","hms","empire","war","mountains","range","house","per","km","second"]);
+function norm(t){return t.toLowerCase().replace(/ø/g,"o").replace(/æ/g,"ae").normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[’'.,]/g,"").replace(/[^a-z0-9]+/g," ").trim()}
+function core(t){return norm(t).split(" ").filter(w=>w&&!STOP.has(w)).join(" ")}
+function lev(a,b){const m=a.length,n=b.length;let p=[...Array(n+1).keys()];for(let i=1;i<=m;i++){const c=[i];for(let j=1;j<=n;j++)c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]===b[j-1]?0:1));p=c}return p[n]}
+function close(a,b){
+  if(!a||!b)return false;if(a===b||a.replace(/ /g,"")===b.replace(/ /g,""))return true;
+  if(/\d/.test(b))return false;
+  const tol=b.length>=9?2:b.length>=5?1:0;return lev(a,b)<=tol}
+function check(input,q){
+  const ans=q[3],ia=norm(input),ic=core(input);if(!ia)return false;
+  const targets=[norm(ans),core(ans),...(ALIAS[ans]||[]).map(norm)];
+  if(/^who/i.test(q[2])){const w=norm(ans).split(" ");if(w.length>1&&w[w.length-1].length>=4)targets.push(w[w.length-1])}
+  return targets.some(t=>close(ia,t)||close(ic,t));
+}
+function hintPattern(ans){return ans.split(" ").map((w,wi)=>[...w].map((ch,i)=>/[A-Za-z0-9À-ɏ]/.test(ch)?(i===0&&wi===0?ch:"_"):ch).join(" ")).join("   ")}
+function renderQ(){
+  const q=round.qs[round.i];round.answered=false;round.hints=0;
+  $("meta").textContent=`${CATS[q[0]]}, ${DIFF[q[1]].toLowerCase()}`;
+  $("tally").textContent=`${round.i+1} of ${round.qs.length}`;
+  renderRoute();
+  $("qtext").textContent=q[2];
+  const inp=$("ans");inp.value="";inp.disabled=false;$("submit").disabled=false;
+  $("hint").disabled=false;$("hint").textContent="Hint";$("giveup").classList.remove("hidden");
+  $("hintline").classList.add("hidden");$("opts").classList.add("hidden");$("opts").innerHTML="";
+  $("fb").innerHTML="";$("fbbox").classList.add("hidden");$("next").classList.add("hidden");
+  inp.focus();
+  clearInterval(timerId);
+  const tb=$("timerbar");
+  if(settings.timer){
+    $("timerbar-box").classList.remove("hidden");let left=settings.timer;const bar=tb.firstElementChild;
+    bar.style.transition="none";bar.style.width="100%";void bar.offsetWidth;bar.style.transition="";
+    timerId=setInterval(()=>{left--;bar.style.width=(left/settings.timer*100)+"%";if(left<=0){clearInterval(timerId);answer(null)}},1000);
+  } else $("timerbar-box").classList.add("hidden");
+}
+function useHint(){
+  if(round.answered)return;const q=round.qs[round.i];round.hints++;
+  if(round.hints===1){
+    const hl=$("hintline");hl.innerHTML=`starts with <b></b>, ${q[3].replace(/[^A-Za-z0-9À-ɏ]/g,"").length} characters &nbsp;<span class="pat"></span>`;
+    hl.querySelector("b").textContent=q[3][0];hl.querySelector(".pat").textContent=hintPattern(q[3]);hl.classList.remove("hidden");
+    $("hint").textContent="Show options";
+  } else {
+    const box=$("opts");box.innerHTML="";
+    shuffle([q[3],...q[4]]).forEach((o,i)=>{const b=document.createElement("button");b.className="opt";b.dataset.v=o;
+      b.innerHTML=`<span class="k">${i+1}</span><span></span>`;b.lastChild.textContent=o;
+      b.onclick=()=>{$("ans").value=o;answer(o)};box.appendChild(b)});
+    box.classList.remove("hidden");$("hint").disabled=true;
+  }
+  if(round.hints===1)$("ans").focus();
+}
+function answer(choice){
+  if(round.answered)return;
+  const q=round.qs[round.i];
+  if(choice!==null&&!choice.trim()){$("ans").focus();return}
+  round.answered=true;clearInterval(timerId);
+  const ok=choice!==null&&check(choice,q);
+  const hinted=round.hints>0;
+  round.res.push(ok);
+  const s=stats.q[ID(q)]||{r:0,w:0,last:1};ok?s.r++:s.w++;s.last=ok&&!hinted?1:0;stats.q[ID(q)]=s;
+  streak=ok&&!hinted?streak+1:0;if(streak>stats.best)stats.best=streak;saveStats();
+  $("ans").disabled=true;$("submit").disabled=true;$("hint").disabled=true;$("giveup").classList.add("hidden");
+  document.querySelectorAll(".opt").forEach(b=>{b.disabled=true;
+    if(b.dataset.v===q[3])b.classList.add("right");else if(b.dataset.v===choice)b.classList.add("wrong");else b.classList.add("dim")});
+  const [name,url]=SRC[q[6]];
+  const link=url||("https://www.britannica.com/search?query="+encodeURIComponent(q[3]));
+  const exact=ok&&norm(choice)===norm(q[3]);
+  const head=ok?(hinted?`Correct, with a hint. It's ${q[3]}.`:exact?"Correct.":`Correct. It's spelt ${q[3]}.`)
+    :choice===null?`It's ${q[3]}.`:`Not quite. It's ${q[3]}.`;
+  $("fb").innerHTML=`<div class="feedback${ok?"":" bad"}"><strong></strong><p></p><p class="small">check it at <a target="_blank" rel="noopener"></a></p></div>`;
+  $("fbbox").classList.remove("hidden");const f=$("fb").firstChild;f.querySelector("strong").textContent=head;f.querySelector("p").textContent=q[5]+(hinted&&ok?" It stays in your weak spots until you get it without a hint.":"");
+  const a=f.querySelector("a");a.textContent=name;a.href=link;
+  $("tally").textContent=`${round.res.filter(Boolean).length} right so far`;
+  renderRoute();
+  const n=$("next");n.textContent=round.i+1<round.qs.length?"Next question":"See results";n.classList.remove("hidden");n.focus();
+}
+function next(){if(!round.answered)return;round.i++;round.i<round.qs.length?renderQ():finish()}
+function finish(){
+  clearInterval(timerId);
+  const done=round.res.length,right=round.res.filter(Boolean).length;
+  show("results");
+  $("rmeta").textContent=[...settings.cats].map(c=>CATS[c]).join(", ");
+  $("rscore").textContent=`${right} of ${done}`;
+  const pct=done?right/done:0;
+  $("rnote").textContent=!done?"You ended before answering anything.":pct===1?"Perfect round. Try a harder difficulty or turn the timer on.":pct>=.7?"Solid. The ones you missed are now in your weak spots.":"The ones you missed are saved to your weak spots, so run that mode next to lock them in.";
+  const m=$("missed");m.innerHTML="";
+  round.qs.slice(0,done).forEach((q,i)=>{if(round.res[i])return;
+    const li=document.createElement("li");li.innerHTML=`<div class="mq"></div><div class="ma"></div>`;
+    li.firstChild.textContent=q[2];li.lastChild.textContent=q[3];m.appendChild(li)});
+  $("reviewbox").classList.toggle("hidden",!m.children.length)
+}
+$("start").onclick=startRound;
+$("next").onclick=next;
+$("quit").onclick=()=>{round.qs=round.qs.slice(0,round.res.length);finish()};
+$("again").onclick=()=>{startRound()};
+$("back").onclick=()=>{show("setup");renderSetup()};
+$("submit").onclick=()=>answer($("ans").value);
+$("hint").onclick=useHint;
+$("giveup").onclick=()=>answer(null);
+$("ans").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();answer($("ans").value)}});
+document.addEventListener("keydown",e=>{
+  if($("quiz").classList.contains("hidden"))return;
+  if(e.key==="Enter"&&round.answered&&document.activeElement!==$("next")){e.preventDefault();next()}
+});
+renderSetup();
+</script>
+</body>
+</html>
