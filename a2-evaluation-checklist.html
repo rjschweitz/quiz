@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>A2 Evaluation Report Checklist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+:root{
+  --bg:#f3f5f8; --surface:#ffffff; --fg:#17202b; --muted:#5d6878; --line:#d9dee6;
+  --accent:#2a55c9; --accent-soft:#e3eafb; --done:#2e7d4f; --done-soft:#e1f1e7;
+  --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --body:"IBM Plex Sans",ui-sans-serif,system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#11161d; --surface:#18202a; --fg:#e6ebf2; --muted:#98a3b3; --line:#2a3542;
+  --accent:#8aa8ff; --accent-soft:#1f2b48; --done:#6fcf97; --done-soft:#17312a; color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5}
+.wrap{max-width:820px;margin:0 auto;padding-inline:16px;padding-block:32px 64px;display:grid;gap:28px}
+header{display:grid;gap:10px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(28px,5vw,40px);line-height:1.05;margin:0;text-wrap:balance;letter-spacing:-.01em}
+.lede{margin:0;color:var(--muted);max-width:62ch}
+.overall{display:grid;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px}
+.overall-top{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.overall-num{font-family:var(--display);font-weight:800;font-size:28px;font-variant-numeric:tabular-nums}
+.bar{height:8px;background:var(--line);border-radius:99px;overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--accent);transition:width .25s}
+.tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{font:500 13px var(--body);background:transparent;color:var(--fg);border:1px solid var(--line);border-radius:99px;padding:6px 12px;cursor:pointer}
+.btn[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.btn:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.status{font-size:13px;color:var(--muted);margin-left:auto}
+section.phase{display:grid;gap:10px}
+.ph-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.ph-num{font-family:var(--mono);font-size:13px;color:var(--accent)}
+h2{font-family:var(--display);font-weight:600;font-size:21px;margin:0;flex:1;min-width:0;text-wrap:balance}
+.ph-count{font-family:var(--mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.ph-note{margin:0;color:var(--muted);font-size:14px;max-width:65ch}
+ul{list-style:none;margin:0;padding:0;background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+li{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;padding:12px 14px;border-top:1px solid var(--line)}
+li:first-child{border-top:0}
+li.done{background:var(--done-soft)}
+li.done .txt{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--muted)}
+.cb{appearance:none;width:20px;height:20px;margin:2px 0 0;border:2px solid var(--muted);border-radius:5px;cursor:pointer;display:grid;place-items:center;background:var(--surface)}
+.cb:checked{background:var(--done);border-color:var(--done)}
+.cb:checked::after{content:"";width:5px;height:10px;border:solid var(--surface);border-width:0 2px 2px 0;transform:translateY(-1px) rotate(45deg)}
+.main{min-width:0;display:grid;gap:6px}
+.txt{cursor:pointer}
+.meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.owner{font:13px var(--body);color:var(--fg);background:transparent;border:1px dashed var(--line);border-radius:6px;padding:3px 8px;width:160px;max-width:100%}
+.owner::placeholder{color:var(--muted)}
+.owner:not(:placeholder-shown){border-style:solid}
+.notes{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:grid;gap:8px}
+.notes h2{font-size:18px}
+.notes ul{border:0;background:transparent;list-style:disc;padding-left:20px;display:grid;gap:6px}
+.notes li{display:list-item;padding:0;border:0}
+footer{color:var(--muted);font-size:13px}
+@media (prefers-reduced-motion:reduce){.bar>i{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Advanced Interaction Design · Assessment 2</div>
+    <h1>A2 Evaluation Report checklist</h1>
+    <p class="lede">Everything the template asks for, filled out using the sample report as a guide. Tick things off and put your name next to what you're doing. Your ticks and names save in your own browser, so agree on who owns what in the group chat too.</p>
+  </header>
+  <div class="overall" id="overall"></div>
+  <div class="tools">
+    <button class="btn" id="f-all" aria-pressed="true">Show all</button>
+    <button class="btn" id="f-open" aria-pressed="false">Only what's left</button>
+    <button class="btn" id="copy">Copy as text</button>
+    <button class="btn" id="reset">Clear my ticks</button>
+    <span class="status" id="status" aria-live="polite"></span>
+  </div>
+  <div id="phases"></div>
+  <div class="notes">
+    <h2>Where the sample differs from the template</h2>
+    <ul>
+      <li>The template's UX journal table has a "Major factor affecting the UX" column. The sample swapped it for "Quality of user experiences". Including both is the safe option.</li>
+      <li>The sample is incomplete. It has no Conclusion, and its Limitations section is only a heading, so those parts come from the template alone.</li>
+      <li>The sample's scenarios section points to the wrong appendix. Check every appendix reference before you submit.</li>
+    </ul>
+  </div>
+  <footer>Based on the A2 Evaluation Report template and the sample evaluation report. Check Canvas for the rubric and the full appendix list.</footer>
+</div>
+<script>
+(function(){
+const PHASES=[
+ {t:"Team setup",items:[
+  ["s1","Read the A2 brief and rubric on Canvas"],
+  ["s2","Check Canvas for the required appendix list"],
+  ["s3","Split ownership: Intro and Exec Summary, Part A, Part B, Limitations and Conclusion, Appendix, final edit"],
+  ["s4","Set up a shared doc or Teams channel where testers drop their notes after each session"],
+  ["s5","Agree on internal dates for testing done, first draft, review and submit"]]},
+ {t:"Lock in the prototype",items:[
+  ["p1","Freeze the hi-fi prototype version you'll test"],
+  ["p2","Fix any obvious heuristic violations before testing, so participants find the less obvious issues"],
+  ["p3","Fill the prototype with realistic content (tutorial, help pages) so testers don't need you to explain things"],
+  ["p4","Check it runs properly on a phone"],
+  ["p5","Screenshot every screen now for the \"before\" images and Appendix D"]]},
+ {t:"Plan the usability testing (Part A)",items:[
+  ["a1","Write 3 to 4 scenarios, each one short (1 to 2 sentences) and aimed at a different feature"],
+  ["a2","For each scenario, write a line on what the team intends it to test (this goes in Appendix B)"],
+  ["a3","Write a session script every tester follows (greeting, explaining the goal, presenting scenarios, when to help)"],
+  ["a4","Get Nielsen's 10 heuristics on hand for note-taking"],
+  ["a5","Agree on the severity labels: Minor, Major, Critical"],
+  ["a6","Recruit around 5 participants who match your persona's demographic"],
+  ["a7","For each participant, record name, why you chose them, age, suburb, what they do and how they use public transport (this goes in Appendix E)"]]},
+ {t:"Run the usability testing",items:[
+  ["b1","Get consent to record at the start of each session"],
+  ["b2","Ask participants to think aloud while they work through the scenarios"],
+  ["b3","Record with screen recording, video or voice, plus typed notes"],
+  ["b4","Note the date, location and session length (the sample's sessions ran 25 to 30 minutes)"],
+  ["b5","Take photos of participants testing for Appendix F"],
+  ["b6","Upload notes to the shared doc after each session"],
+  ["b7","Write down good participant quotes, since they're useful for justifying improvements"]]},
+ {t:"Plan the UX evaluation (Part B)",items:[
+  ["c1","Choose the approach (the sample used role play with the persona in the real setting) and say why"],
+  ["c2","Write 2 to 3 UX stories that build in emotional intensity, each one tied to a different feature"],
+  ["c3","Give each story a title (like \"Under a spotlight\"), a one-line summary and the full story text"],
+  ["c4","Assign roles: one person plays the persona, one films, one takes notes on emotions and key moments"],
+  ["c5","The tester reads the persona until they can play the role"],
+  ["c6","Pick a realistic location and time (the sample used a train station at night)"]]},
+ {t:"Run the UX evaluation",items:[
+  ["d1","Give the tester about 5 minutes per story to get into character"],
+  ["d2","Run each story (about 10 to 15 minutes each) while the tester thinks aloud"],
+  ["d3","Screen record on the device, plus film the tester and take notes"],
+  ["d4","Debrief straight away: the tester says how they felt, and the observers check their notes against the recordings"],
+  ["d5","Combine everyone's observations and suggest recommendations together"]]},
+ {t:"Analyse and improve",items:[
+  ["e1","Merge all the usability notes and number the issues continuously across every scenario (1, 2, 3 and so on)"],
+  ["e2","Give every issue a task, a description, the heuristic it breaks (and how) and a severity"],
+  ["e3","Write the recommendations table using the same task numbers: change, justification, severity"],
+  ["e4","Pick your 3 most critical issues and fix them in the prototype"],
+  ["e5","For each fix, put the before and after screenshots side by side with annotations naming the heuristic, plus a caption like \"Figure 1.1 (left) … Figure 1.2 (right) …\""],
+  ["e6","Fill in a UX journal table for each story: Phases, Main user experiences, Quality of UX (Good, Bad, Desirable, Undesirable), Recommendations"],
+  ["e7","Pick 2 UX recommendations and build them into the prototype with before and after figures"]]},
+ {t:"Write the report",items:[
+  ["w1","Title page with the solution name, team name, tutorial number, every member's name and student ID, and the tutor"],
+  ["w2","Table of contents (generate it last)"],
+  ["w3","Introduction: the problem and why it matters, any research behind it, and the aim"],
+  ["w4","Introduction: a persona paragraph pointing to Appendix A with a page number"],
+  ["w5","Introduction: what the solution is and its main features"],
+  ["w6","The Prototype: how it went from lo-fi to hi-fi, the tool used, and the fidelity level stated clearly"],
+  ["w7","The Prototype: visual design, content and interactivity choices"],
+  ["w8","The Prototype: main functions being tested and the context of use, pointing to Appendix D"],
+  ["w9","The Evaluations: what Part A and Part B each aim to find, with page ranges"],
+  ["w10","Executive Summary: dates, locations, number of participants, number of scenarios and stories, session lengths"],
+  ["w11","Executive Summary: bullet list of the main usability issues and a bullet list of the main UX findings"],
+  ["w12","Part A Heuristics: why Nielsen's, and how you designed for each heuristic before testing"],
+  ["w13","Part A Recruitment and procedure: who, why, demographics, tester roles, the script, recording, consent, session length"],
+  ["w14","Part A Scenarios: a short explanation, then a bullet list, with a link to Appendix B"],
+  ["w15","Part A Results: an overall usability summary paragraph, then one table per scenario"],
+  ["w16","Part A Recommendations table"],
+  ["w17","Part A Improvements: 3 examples, each with a heading, the issue, the heuristic, the scenario it came from, a participant quote, and annotated before and after figures"],
+  ["w18","Part B Approach: what it was, why, and the artefacts used (persona, stories, prototype)"],
+  ["w19","Part B Procedure: who played which role, the prep, the location, timing, recording and debrief"],
+  ["w20","Part B Stories: why you wrote them, how they build in intensity, which feature each tests, a numbered overview, and a link to Appendix C"],
+  ["w21","Part B Results: an overall findings paragraph, then for each story a summary paragraph and a journal table"],
+  ["w22","Part B Improvements: 2 examples, each with a heading, why you made it, the steps the team took, and before and after figures with captions"],
+  ["w23","Limitations: (i) usability evaluation and (ii) UX evaluation"],
+  ["w24","Conclusions"],
+  ["w25","Appendix A: Persona"],
+  ["w26","Appendix B: Usability scenarios, each with the scenario text and the team's intended aim"],
+  ["w27","Appendix C: UX stories (title, one-line summary, full story)"],
+  ["w28","Appendix D: Hi-fi prototype screens grouped by flow"],
+  ["w29","Appendix E: Participant info table (recruitment reason and demographics)"],
+  ["w30","Appendix F: Photos of participants testing"],
+  ["w31","Anything else Canvas lists"]]},
+ {t:"Format and submit",items:[
+  ["f1","Delete every [bracketed] instruction left over from the template"],
+  ["f2","Header with the report title and subject; footer with team name, tutorial and page number"],
+  ["f3","Number and caption every figure and table"],
+  ["f4","Check every \"see Appendix X, page Y\" reference against the final page numbers"],
+  ["f5","Check the page ranges in The Evaluations are right"],
+  ["f6","Australian spelling, 10 to 12pt font, margins of at least 20mm"],
+  ["f7","APA references, including Nielsen"],
+  ["f8","Fill in the coversheet with everyone's details, the statement of collaboration and signatures"],
+  ["f9","Make sure any AI-assisted text has been rewritten and checked"],
+  ["f10","Have someone proofread each section they didn't write"],
+  ["f11","Submit on Canvas"]]}
+];
+const KEY="a2-eval-checklist-v1";
+let state={};
+try{state=JSON.parse(localStorage.getItem(KEY))||{}}catch(e){state={}}
+let filter="all";
+const $=s=>document.querySelector(s);
+const st=id=>state[id]||{};
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}}
+function upd(id,patch){
+  state[id]=Object.assign({},st(id),patch);
+  if(!state[id].done&&!state[id].owner)delete state[id];
+  persist();
+}
+function render(){
+  let total=0,done=0;
+  const root=$("#phases");root.textContent="";
+  PHASES.forEach((ph,pi)=>{
+    const pd=ph.items.filter(i=>st(i[0]).done).length;
+    total+=ph.items.length;done+=pd;
+    const sec=document.createElement("section");sec.className="phase";
+    const head=document.createElement("div");head.className="ph-head";
+    const num=document.createElement("span");num.className="ph-num";num.textContent=String(pi+1).padStart(2,"0");
+    const h=document.createElement("h2");h.textContent=ph.t;
+    const c=document.createElement("span");c.className="ph-count";c.textContent=pd+" / "+ph.items.length;
+    head.append(num,h,c);sec.append(head);
+    const ul=document.createElement("ul");let shown=0;
+    ph.items.forEach(([id,text])=>{
+      const s=st(id);if(filter==="open"&&s.done)return;shown++;
+      const li=document.createElement("li");if(s.done)li.className="done";
+      const cb=document.createElement("input");cb.type="checkbox";cb.className="cb";cb.id="cb-"+id;cb.checked=!!s.done;
+      cb.addEventListener("change",()=>{upd(id,{done:cb.checked});render()});
+      const main=document.createElement("div");main.className="main";
+      const lab=document.createElement("label");lab.className="txt";lab.htmlFor=cb.id;lab.textContent=text;
+      const meta=document.createElement("div");meta.className="meta";
+      const o=document.createElement("input");o.className="owner";o.id="ow-"+id;o.placeholder="Who's on it?";o.value=s.owner||"";o.setAttribute("aria-label","Owner for: "+text);
+      o.addEventListener("change",()=>upd(id,{owner:o.value.trim().slice(0,40)}));
+      meta.append(o);main.append(lab,meta);li.append(cb,main);ul.append(li);
+    });
+    if(shown)sec.append(ul);
+    else{const p=document.createElement("p");p.className="ph-note";p.textContent="All done here.";sec.append(p)}
+    root.append(sec);
+  });
+  const pct=total?Math.round(done/total*100):0;
+  $("#overall").innerHTML='<div class="overall-top"><span class="eyebrow">Your progress</span><span class="overall-num">'+done+' / '+total+'</span></div><div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+pct+'"><i style="width:'+pct+'%"></i></div>';
+}
+function asText(){
+  return "A2 EVALUATION REPORT CHECKLIST\n\n"+PHASES.map((ph,i)=>(i+1)+". "+ph.t.toUpperCase()+"\n"+ph.items.map(([id,t])=>{const s=st(id);return (s.done?"☑ ":"☐ ")+t+(s.owner?" ("+s.owner+")":"")}).join("\n")).join("\n\n");
+}
+function setFilter(f){filter=f;$("#f-all").setAttribute("aria-pressed",f==="all");$("#f-open").setAttribute("aria-pressed",f==="open");render()}
+$("#f-all").onclick=()=>setFilter("all");
+$("#f-open").onclick=()=>setFilter("open");
+$("#copy").onclick=async()=>{
+  const t=asText();
+  try{await navigator.clipboard.writeText(t);$("#status").textContent="Copied"}
+  catch(e){const ta=document.createElement("textarea");ta.value=t;document.body.append(ta);ta.select();try{document.execCommand("copy");$("#status").textContent="Copied"}catch(_){$("#status").textContent="Couldn't copy"}ta.remove()}
+};
+let armed=false;
+$("#reset").onclick=()=>{
+  if(!armed){armed=true;$("#reset").textContent="Click again to clear";setTimeout(()=>{armed=false;$("#reset").textContent="Clear my ticks"},3000);return}
+  armed=false;state={};persist();$("#reset").textContent="Clear my ticks";$("#status").textContent="Cleared";render();
+};
+render();
+})();
+</script>
+</body>
+</html>
